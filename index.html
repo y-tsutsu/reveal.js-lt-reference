@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/sky.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+					<script type="text/template">
+
+## Pythonの参照
+　
+### by tsutsu
+
+---
+
+### Pythonはすべてがオブジェクトです
+
+--
+
+Python
+
+```
+def main():
+    n = 42
+    m = n
+    print(n, m)	# 42 42
+```
+
+C++
+
+```
+int main()
+{
+    auto n = 42;
+    auto m = n;
+    printf("%d %d\n", n, m);	// 42 42
+
+    return 0;
+}
+```
+
+--
+
+Python
+
+```
+def main():
+    n = 42
+    print(n)	# 42
+
+    n = 23
+    print(n)	# 23
+```
+
+C++
+
+```
+int main()
+{
+    auto n = 42;
+    printf("%d\n", n);	// 42
+
+    n = 23;
+    printf("%d\n", n);	// 23
+
+    return 0;
+}
+```
+
+--
+
+### PythonとC++で結果は同じですが
+
+### 根本的な違いがあるの知ってますか？
+
+---
+
+### Pythonは引数がすべて参照です
+
+--
+
+Python
+
+```
+def spam(n):
+    n = 23
+    print(n)	# 23
+
+def main():
+    n = 42
+    spam(n)
+    print(n)	# 42
+```
+
+C++
+
+```
+int spam(int& n)
+{
+    n = 23;
+    printf("%d\n", n);	// 23
+}
+
+int main()
+{
+    auto n = 42;
+    spam(n);
+    printf("%d\n", n);	// 23
+    return 0;
+}
+```
+
+--
+
+### 同じ参照渡しなのになんで？？
+
+---
+
+### はじめのコードの復習
+
+--
+
+Python
+
+```
+def main():
+    n = 42
+    m = n
+	print(n, id(n), m, id(m)	# 42 1962673904 42 1962673904
+```
+
+C++
+
+```
+int main()
+{
+    auto n = 42;
+    auto m = n;
+    printf("%d %x %d %x\n", n, m);	// 42 61fe48 42 61fe4c
+
+    return 0;
+}
+```
+
+--
+
+### Pythonの場合
+
+### インスタンスが変わっていません
+
+--
+
+Python
+
+```
+def main():
+    n = 42
+    print(n, id(n))	# 42 1962673904
+
+    n = 23
+    print(n, id(n))	# 23 1962673296
+```
+
+C++
+
+```
+int main()
+{
+    auto n = 42;
+    printf("%d %x\n", n, &n);	// 42 61fe4c
+
+    n = 23;
+    printf("%d %x\n", n, &n);	// 23 61fe4c
+
+    return 0;
+}
+```
+
+--
+
+### Pythonの場合
+
+### インスタンスが変わっています
+
+---
+
+### Pythonのintは書き換え不可です
+
+--
+
+### PythonのMutable / Immutable
+
+* Mutableな型
+	* list
+	* dict
+	* set
+* Immutableな型
+	* int
+	* float
+	* str
+	* tuple
+
+--
+
+Python
+
+```
+def spam(n):
+    print(n, id(n))	# 42 1962673904
+    n = 23
+    print(n, id(n))	# 23 1962673296
+def main():
+    n = 42
+    print(n, id(n))	# 42 1962673904
+    spam(n)
+```
+
+C++
+
+```
+int spam(int& n)
+{
+    printf("%d %x\n", n);	// 42 61fe4c
+    n = 23;
+    printf("%d %x\n", n);	// 23 61fe4c
+}
+int main()
+{
+    auto n = 42;
+    printf("%d %x\n", n);	// 42 61fe4c
+    spam(n);
+    return 0;
+}
+```
+
+---
+
+### 参照関連のあれこれ
+
+--
+
+### listのコピー
+
+```
+a = [1, 2, 3]
+b = a                 # これは同じオブジェクトを指すだけ
+c = a[:]              # スライスを使ったShallwCopy
+import copy
+d = copy.deepcopy(a)  # DeepCopyも簡単にできます
+```
+
+--
+
+### listの初期化
+
+```
+a = [1, 2, 3] * 3           # [1, 2, 3, 1, 2, 3, 1, 2, 3]
+
+b = [[]] * 3                # [[], [], []] 空のlistのlist
+b[0].append(1)              # [[1], [1], [1]] 内部のlistすべてが更新される
+
+c = [[] for _ in range(3)]  # [[], [], []] 空のlistのlist
+c[0].append(1)              # [[1], [], []] 内部のlistすべてが更新される
+```
+
+--
+
+### listの連結
+
+```
+def main():
+    a = [1, 2, 3]
+    b = a
+    print(a, b)    # [1, 2, 3] [1, 2, 3]
+    a.append(4)
+    print(a, b)    # [1, 2, 3, 4] [1, 2, 3, 4]
+    a += [5]
+    print(a, b)    # [1, 2, 3, 4, 5] [1, 2, 3, 4, 5]
+    a = a + [6]
+    print(a, b)    # [1, 2, 3, 4, 5, 6] [1, 2, 3, 4, 5]
+```
+
+--
+
+### listのdefault引数
+
+```
+class Spam:
+    def __init__(self, l = []):
+        self.lst = l
+        print(self.lst)
+
+    def append(self, n):
+        self.lst.append(n)
+        print(self.lst)
+
+def main():
+    spam = Spam()    # []
+    spam.append(1)   # [1]
+    ham = Spam()     # [1] ([0]じゃない！)
+```
+
+--
+
+### default引数の回避策
+
+```
+class Spam:
+    def __init__(self, l = None):
+        self.lst = [] if l is None else l
+        print(self.lst)
+
+    def append(self, n):
+        self.lst.append(n)
+        print(self.lst)
+
+def main():
+    spam = Spam()    # []
+    spam.append(1)   # [1]
+    ham = Spam()     # []
+```
+
+--
+
+### オブジェクトの比較
+
+```
+def main():
+    a = [1, 2, 3]
+    b = a
+    c = [1, 2, 3]
+    print(a == b, a is b)   # True True
+    print(a == c, a is c)   # True False
+
+    A = 1
+    B = A
+    C = 1
+    print(A == B, A is B)   # True True
+    print(A == C, A is C)   # True True
+```
+
+---
+
+## Thank U for Reading
+　
+### by tsutsu
+
+					</script>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
