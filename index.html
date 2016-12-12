@@ -103,8 +103,8 @@ Python
 
 ```
 def spam(n):
-    n = 23
-    print(n)	# 23
+    n += 1
+    print(n)	# 43
 
 def main():
     n = 42
@@ -117,15 +117,15 @@ C++
 ```
 int spam(int& n)
 {
-    n = 23;
-    printf("%d\n", n);	// 23
+    n += 1;
+    printf("%d\n", n);	// 43
 }
 
 int main()
 {
     auto n = 42;
     spam(n);
-    printf("%d\n", n);	// 23
+    printf("%d\n", n);	// 43
     return 0;
 }
 ```
@@ -156,7 +156,7 @@ int main()
 {
     auto n = 42;
     auto m = n;
-    printf("%d %x %d %x\n", n, m);	// 42 61fe48 42 61fe4c
+    printf("%d %x %d %x\n", n, &n, m, &m);	// 42 61fe48 42 61fe4c
 
     return 0;
 }
@@ -227,8 +227,8 @@ Python
 ```
 def spam(n):
     print(n, id(n))	# 42 1962673904
-    n = 23
-    print(n, id(n))	# 23 1962673296
+    n += 1
+    print(n, id(n))	# 43 1962673296
 def main():
     n = 42
     print(n, id(n))	# 42 1962673904
@@ -241,8 +241,8 @@ C++
 int spam(int& n)
 {
     printf("%d %x\n", n);	// 42 61fe4c
-    n = 23;
-    printf("%d %x\n", n);	// 23 61fe4c
+    n += 1;
+    printf("%d %x\n", n);	// 43 61fe4c
 }
 int main()
 {
@@ -307,12 +307,12 @@ def main():
 ```
 class Spam:
     def __init__(self, l = []):
-        self.lst = l
-        print(self.lst)
+        self.__lst = l
+        print(self.__lst)
 
     def append(self, n):
-        self.lst.append(n)
-        print(self.lst)
+        self.__lst.append(n)
+        print(self.__lst)
 
 def main():
     spam = Spam()    # []
@@ -327,12 +327,12 @@ def main():
 ```
 class Spam:
     def __init__(self, l = None):
-        self.lst = [] if l is None else l
-        print(self.lst)
+        self.__lst = [] if l is None else l
+        print(self.__lst)
 
     def append(self, n):
-        self.lst.append(n)
-        print(self.lst)
+        self.__lst.append(n)
+        print(self.__lst)
 
 def main():
     spam = Spam()    # []
